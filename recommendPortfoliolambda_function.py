@@ -81,6 +81,17 @@ def close(session_attributes, fulfillment_state, message):
 
 
 ### Intents Handlers ###
+def check_data(age, investment_amount):
+    age = parse_int(age)
+    if age < 0 : 
+        return build_validation_result(False, 'age', 'invalid age, your age should be greater than zero')
+    elif age >= 65 : 
+        return build_validation_result(False, 'age', 'invalid age, your age should be less than 65')
+    investment_amount = parse_int(investment_amount)
+    if investment_amount < 5000 : 
+        return build_validation_result(False, 'investment_amount', 'invalid investment amount, your investment should be greater than 4999')
+    return build_validation_result(True, None, None)
+    
 def recommend_portfolio(intent_request):
     """
     Performs dialog management and fulfillment for recommending a portfolio.
@@ -98,6 +109,17 @@ def recommend_portfolio(intent_request):
         # for the first violation detected.
 
         ### YOUR DATA VALIDATION CODE STARTS HERE ###
+        slots = get_slots(intent_request)
+        valedate = check_data(age, investment_amount)
+        
+        if not valedate["isValid"]:
+            slots[valedate["violatedSlot"]] = None
+            return elicit_slot(
+                intent_request["sessionAttributes"],
+                intent_request["currentIntent"]["name"],
+                slots,
+                valedate["violatedSlot"],
+                valedate["message"])
 
         ### YOUR DATA VALIDATION CODE ENDS HERE ###
 
@@ -109,6 +131,15 @@ def recommend_portfolio(intent_request):
     # Get the initial investment recommendation
 
     ### YOUR FINAL INVESTMENT RECOMMENDATION CODE STARTS HERE ###
+    levels = {
+        "none": "100% bonds (AGG), 0% equities (SPY)",
+        "very low": "80% bonds (AGG), 20% equities (SPY)",
+        "low": "60% bonds (AGG), 40% equities (SPY)",
+        "medium": "40% bonds (AGG), 60% equities (SPY)",
+        "high": "20% bonds (AGG), 80% equities (SPY)",
+        "very high": "0% bonds (AGG), 100% equities (SPY)"
+    }
+    initial_recommendation = levels[risk_level.lower()]
 
     ### YOUR FINAL INVESTMENT RECOMMENDATION CODE ENDS HERE ###
 
@@ -148,5 +179,3 @@ def lambda_handler(event, context):
     Route the incoming request based on intent.
     The JSON body of the request is provided in the event slot.
     """
-
-    return dispatch(event)

@@ -110,16 +110,16 @@ def recommend_portfolio(intent_request):
 
         ### YOUR DATA VALIDATION CODE STARTS HERE ###
         slots = get_slots(intent_request)
-        valedate = check_data(age, investment_amount)
+        validate = check_data(age, investment_amount)
         
-        if not valedate["isValid"]:
-            slots[valedate["violatedSlot"]] = None
+        if not validate["isValid"]:
+            slots[validate["violatedSlot"]] = None
             return elicit_slot(
                 intent_request["sessionAttributes"],
                 intent_request["currentIntent"]["name"],
                 slots,
-                valedate["violatedSlot"],
-                valedate["message"])
+                validate["violatedSlot"],
+                validate["message"])
 
         ### YOUR DATA VALIDATION CODE ENDS HERE ###
 
